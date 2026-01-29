@@ -90,6 +90,21 @@ public class Player : MonoBehaviour
         HandleCrouch();
     }
 
+    void Update()
+    {
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
+        {
+            if (hit.collider.CompareTag("Enemy"))
+            {
+                ShameEnemy enemyScript = hit.collider.GetComponent<ShameEnemy>();
+                if (enemyScript != null)
+                {
+                    enemyScript.Hide();
+                }
+            }
+        }
+    }
+
     private void HandleMovement()
     {
         Vector3 movement = new Vector3(moveInput.x, 0f, moveInput.y);
