@@ -84,7 +84,7 @@ public class Player : MonoBehaviour
         isCrouching = context.ReadValueAsButton();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         HandleMovement();
         HandleCrouch();
