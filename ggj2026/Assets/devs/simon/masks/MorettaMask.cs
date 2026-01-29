@@ -6,14 +6,12 @@ using System.Collections.Generic;
 public class MorettaMask : BaseMask
 {
     [Header("Moretta Mask")]
-    [SerializeField] private GameObject MainAtackPrefab;
+    [SerializeField] private GameObject MainAttackPrefab;
 
     [Header("Main Attack Stats")]
-    [SerializeField] private int mainAtackDamage = 10;
-    [SerializeField] private float mainAtackSpeed = 2f; // Higher = Faster
-    [SerializeField] private int mainAtackDistance = 1;
-
-    public int MainAttackDamage => mainAtackDamage;
+    [SerializeField] private int mainAttackDamage = 10;
+    [SerializeField] private float mainAttackSpeed = 2f; // Attacks per second
+    [SerializeField] private float mainAttackDistance = 1f;
 
     [Header("Dash Attack Stats")]
     [SerializeField] private int dashDamage = 15;
@@ -22,11 +20,16 @@ public class MorettaMask : BaseMask
     [SerializeField] private float dashStartupDelay = 0.15f;
     [SerializeField] private float dashHitRadius = 1.2f;
 
-    private float attackCooldown = 0f;
-    private bool isDashing = false;
+    [Header("Dash Cooldown")]
+    [SerializeField] private float dashCooldown = 1f; // Delay between dashes
+    private float dashTimer = 0f;
 
+    private bool isDashing = false;
     private InputSystem_Actions playerInput;
     private CharacterController characterController;
+    private float attackCooldown = 0f;
+
+    public int MainAttackDamage => mainAttackDamage;
 
     void OnEnable()
     {
@@ -41,65 +44,96 @@ public class MorettaMask : BaseMask
         playerInput.Player.Disable();
     }
 
-    void Update()
+    void FixedUpdate()
     {
+        // Reduce cooldown timers
+        if (attackCooldown > 0f)
+            attackCooldown -= Time.deltaTime;
+
+        if (dashTimer > 0f)
+            dashTimer -= Time.deltaTime;
+
         HandleMainAttack();
-        HandleSecondaryAttack();
+        HandleDash();
     }
 
     private void HandleMainAttack()
     {
-        if (attackCooldown > 0f)
-            attackCooldown -= Time.deltaTime;
-
-        if (playerInput.Player.AttackMain.IsPressed())
+        if (playerInput.Player.AttackMain.IsPressed() && attackCooldown <= 0f)
         {
-            if (attackCooldown <= 0f)
-            {
-                MainAtackMask();
-            }
-        }
-    }
-
-    private void HandleSecondaryAttack()
-    {
-        if (playerInput.Player.AttackSecondairy.triggered && !isDashing)
-        {
-            StartCoroutine(DashRoutine());
+            MainAttack();
         }
     }
 
     override public void MainAtackMask()
     {
-        attackCooldown = 1f / mainAtackSpeed;
+        MainAttack();
+    }
 
+    private void MainAttack()
+    {
+        attackCooldown = 1f / mainAttackSpeed;
+
+        // Start sliding forward coroutine
+        float slideDistance = 0.5f;   // How far the player slides
+        float slideDuration = 0.15f;  // How long the slide lasts
+        StartCoroutine(SlideForward(slideDistance, slideDuration));
+
+        // Spawn the attack prefab
         Instantiate(
-            MainAtackPrefab,
-            transform.position + transform.forward * mainAtackDistance,
+            MainAttackPrefab,
+            transform.position + transform.forward * mainAttackDistance,
             transform.rotation
         );
 
-        Debug.Log("Moretta Mask Main Attack");
+        Debug.Log("Moretta Mask Main Attack with Sliding Step");
     }
 
-    override public void SecondaryAtackMask()
+    // Smooth slide coroutine
+    private IEnumerator SlideForward(float distance, float duration)
     {
-        // Dash handled in coroutine
+        float elapsed = 0f;
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + transform.forward * distance;
+
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            // Smooth interpolation
+            Vector3 newPos = Vector3.Lerp(startPos, targetPos, t);
+            Vector3 move = newPos - transform.position;
+            characterController.Move(move);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Ensure final position is exact
+        characterController.Move(targetPos - transform.position);
+    }
+
+
+
+    private void HandleDash()
+    {
+        if (playerInput.Player.AttackSecondairy.triggered && !isDashing && dashTimer <= 0f)
+        {
+            StartCoroutine(DashRoutine());
+            dashTimer = dashCooldown; // Start cooldown
+        }
     }
 
     private IEnumerator DashRoutine()
     {
         isDashing = true;
 
+        Vector3 dashDirection = transform.forward;
         float dashDuration = dashDistance / dashSpeed;
         float elapsedTime = 0f;
 
-        Vector3 dashDirection = transform.forward;
-
-        // Track hit targets so we don't double-hit later
         HashSet<GameObject> hitTargets = new HashSet<GameObject>();
 
-        // Startup delay before dash movement
+        // Startup delay before dash begins
         yield return new WaitForSeconds(dashStartupDelay);
 
         while (elapsedTime < dashDuration)
@@ -107,7 +141,7 @@ public class MorettaMask : BaseMask
             // Move player forward
             characterController.Move(dashDirection * dashSpeed * Time.deltaTime);
 
-            // Damage detection placeholder
+            // Damage detection
             DealDashDamage(hitTargets);
 
             elapsedTime += Time.deltaTime;
@@ -115,7 +149,7 @@ public class MorettaMask : BaseMask
         }
 
         isDashing = false;
-        Debug.Log("Moretta Mask Dash Attack");
+        Debug.Log("Moretta Mask Dash Finished");
     }
 
     private void DealDashDamage(HashSet<GameObject> hitTargets)
@@ -134,9 +168,14 @@ public class MorettaMask : BaseMask
             //     hitTargets.Add(hit.gameObject);
             // }
 
-            // Temporary debug log instead
+            // Temporary debug
             // Debug.Log($"Dash would hit: {hit.name}");
         }
+    }
+
+    override public void SecondaryAtackMask()
+    {
+        HandleDash();
     }
 
     override public void SetMaskStats()

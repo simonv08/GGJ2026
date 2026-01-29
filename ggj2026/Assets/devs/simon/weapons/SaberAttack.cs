@@ -4,7 +4,7 @@ public class SaberAttack : MonoBehaviour
 {
     [SerializeField] private MorettaMask morettaMask;
     private int damage;
-
+    public float SelfDestructTime = 0.2f;
     void Awake()
     {
         if (morettaMask == null)
@@ -16,6 +16,7 @@ public class SaberAttack : MonoBehaviour
                 morettaMask = player.GetComponent<MorettaMask>();
             }
         }
+        Destroy(this.gameObject, SelfDestructTime);
     }
 
     public int GetMainAttackDamage()
