@@ -21,7 +21,8 @@ public class ShameEnemy : EnemyBase
     {
         base.Update();
         HandleSwitch();
-        
+        DoState();
+
     }
 
     private void HandleSwitch()
@@ -42,11 +43,16 @@ public class ShameEnemy : EnemyBase
         switch (currentState)
         {
             case State.Normal:
-                //do normal
+                Debug.Log("Normal");
                 break;
             case State.Hidden:
-                //do hide
+                Debug.Log("Hidden");
                 break;
         }
+    }
+
+    public void Hide()
+    {
+        currentState = State.Hidden;
     }
 }

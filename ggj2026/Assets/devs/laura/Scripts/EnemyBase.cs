@@ -16,6 +16,8 @@ public abstract class EnemyBase : MonoBehaviour
         {
             Die();
         }
+        
+        
     }
 
     public void DoDamage(int damage)
