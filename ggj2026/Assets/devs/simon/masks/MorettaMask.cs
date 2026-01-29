@@ -10,24 +10,34 @@ public class MorettaMask : BaseMask
 
     [Header("Main Attack Stats")]
     [SerializeField] private int mainAttackDamage = 10;
-    [SerializeField] private float mainAttackSpeed = 2f; // Attacks per second
+    [SerializeField] private float mainAttackSpeed = 2f;
     [SerializeField] private float mainAttackDistance = 1f;
 
-    [Header("Dash Attack Stats")]
+    [Header("Dash Settings")]
     [SerializeField] private int dashDamage = 15;
-    [SerializeField] private float dashSpeed = 12f;
     [SerializeField] private float dashDistance = 5f;
-    [SerializeField] private float dashStartupDelay = 0.15f;
+    [SerializeField] private float dashSpeed = 20f;
     [SerializeField] private float dashHitRadius = 1.2f;
 
     [Header("Dash Cooldown")]
-    [SerializeField] private float dashCooldown = 1f; // Delay between dashes
-    private float dashTimer = 0f;
+    [SerializeField] private float dashCooldown = 1f;
 
+    [Header("Player Settings Adjustment")]
+    [SerializeField] private float moveSpeed_Player = 6f;
+    [SerializeField] private float gravity_Player = -18f;
+    [SerializeField] private float jumpForce_Player = 8f;
+    [SerializeField] private float crouchHeight_Player = 1f;
+    [SerializeField] private float crouchSpeedMultiplier_Player = 1f;
+    [SerializeField] private float crouchSmoothSpeed_Player = 15f;
+
+    private float dashTimer = 0f;
     private bool isDashing = false;
+
     private InputSystem_Actions playerInput;
     private CharacterController characterController;
     private float attackCooldown = 0f;
+
+    private Player playerScript;
 
     public int MainAttackDamage => mainAttackDamage;
 
@@ -37,16 +47,29 @@ public class MorettaMask : BaseMask
         playerInput.Player.Enable();
 
         characterController = GetComponent<CharacterController>();
+        playerScript = GetComponent<Player>();
+
+        ApplyPlayerSettings();
+
+        playerInput.Player.AttackSecondairy.performed += OnDashPressed;
     }
 
     void OnDisable()
     {
+        playerInput.Player.AttackSecondairy.performed -= OnDashPressed;
         playerInput.Player.Disable();
     }
 
-    void FixedUpdate()
+    private void OnDashPressed(InputAction.CallbackContext ctx)
     {
-        // Reduce cooldown timers
+        if (!isDashing && dashTimer <= 0f)
+        {
+            StartCoroutine(SlideDash(dashDistance, dashSpeed));
+        }
+    }
+
+    void Update()
+    {
         if (attackCooldown > 0f)
             attackCooldown -= Time.deltaTime;
 
@@ -54,7 +77,6 @@ public class MorettaMask : BaseMask
             dashTimer -= Time.deltaTime;
 
         HandleMainAttack();
-        HandleDash();
     }
 
     private void HandleMainAttack()
@@ -74,22 +96,17 @@ public class MorettaMask : BaseMask
     {
         attackCooldown = 1f / mainAttackSpeed;
 
-        // Start sliding forward coroutine
-        float slideDistance = 0.5f;   // How far the player slides
-        float slideDuration = 0.15f;  // How long the slide lasts
+        float slideDistance = 0.5f;
+        float slideDuration = 0.15f;
         StartCoroutine(SlideForward(slideDistance, slideDuration));
 
-        // Spawn the attack prefab
         Instantiate(
             MainAttackPrefab,
             transform.position + transform.forward * mainAttackDistance,
             transform.rotation
         );
-
-        Debug.Log("Moretta Mask Main Attack with Sliding Step");
     }
 
-    // Smooth slide coroutine
     private IEnumerator SlideForward(float distance, float duration)
     {
         float elapsed = 0f;
@@ -99,7 +116,6 @@ public class MorettaMask : BaseMask
         while (elapsed < duration)
         {
             float t = elapsed / duration;
-            // Smooth interpolation
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, t);
             Vector3 move = newPos - transform.position;
             characterController.Move(move);
@@ -108,48 +124,45 @@ public class MorettaMask : BaseMask
             yield return null;
         }
 
-        // Ensure final position is exact
         characterController.Move(targetPos - transform.position);
     }
 
-
-
-    private void HandleDash()
-    {
-        if (playerInput.Player.AttackSecondairy.triggered && !isDashing && dashTimer <= 0f)
-        {
-            StartCoroutine(DashRoutine());
-            dashTimer = dashCooldown; // Start cooldown
-        }
-    }
-
-    private IEnumerator DashRoutine()
+    private IEnumerator SlideDash(float distance, float speed)
     {
         isDashing = true;
 
-        Vector3 dashDirection = transform.forward;
-        float dashDuration = dashDistance / dashSpeed;
-        float elapsedTime = 0f;
-
+        float remainingDistance = distance;
         HashSet<GameObject> hitTargets = new HashSet<GameObject>();
 
-        // Startup delay before dash begins
-        yield return new WaitForSeconds(dashStartupDelay);
-
-        while (elapsedTime < dashDuration)
+        while (remainingDistance > 0f)
         {
-            // Move player forward
-            characterController.Move(dashDirection * dashSpeed * Time.deltaTime);
+            float moveStep = speed * Time.deltaTime;
+            if (moveStep > remainingDistance)
+                moveStep = remainingDistance;
 
-            // Damage detection
+            Vector3 move = transform.forward * moveStep;
+            characterController.Move(move);
+
             DealDashDamage(hitTargets);
 
-            elapsedTime += Time.deltaTime;
+            remainingDistance -= moveStep;
             yield return null;
         }
 
         isDashing = false;
-        Debug.Log("Moretta Mask Dash Finished");
+        dashTimer = dashCooldown;
+    }
+
+    private void ApplyPlayerSettings()
+    {
+        if (playerScript == null) return;
+
+        playerScript.moveSpeed = moveSpeed_Player;
+        playerScript.gravity = gravity_Player;
+        playerScript.jumpForce = jumpForce_Player;
+        playerScript.crouchHeight = crouchHeight_Player;
+        playerScript.crouchSpeedMultiplier = crouchSpeedMultiplier_Player;
+        playerScript.crouchSmoothSpeed = crouchSmoothSpeed_Player;
     }
 
     private void DealDashDamage(HashSet<GameObject> hitTargets)
@@ -158,24 +171,24 @@ public class MorettaMask : BaseMask
 
         foreach (Collider hit in hits)
         {
-            if (hitTargets.Contains(hit.gameObject))
+            GameObject root = hit.transform.root.gameObject;
+
+            if (hitTargets.Contains(root))
                 continue;
 
-            // DAMAGE SYSTEM PLACEHOLDER
-            // if (hit.TryGetComponent(out IDamageable damageable))
-            // {
-            //     damageable.TakeDamage(dashDamage);
-            //     hitTargets.Add(hit.gameObject);
-            // }
-
-            // Temporary debug
-            // Debug.Log($"Dash would hit: {hit.name}");
+            // EnemyBase damage pattern
+            EnemyBase enemy = hit.GetComponentInParent<EnemyBase>();
+            if (enemy != null)
+            {
+                enemy.DoDamage(dashDamage);
+                hitTargets.Add(root);
+            }
         }
     }
 
     override public void SecondaryAtackMask()
     {
-        HandleDash();
+        // Dash handled via input callback
     }
 
     override public void SetMaskStats()
@@ -187,5 +200,12 @@ public class MorettaMask : BaseMask
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, dashHitRadius);
+
+        if (Application.isPlaying && characterController != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(transform.position, transform.position + transform.forward * dashDistance);
+            Gizmos.DrawWireSphere(transform.position + transform.forward * dashDistance, dashHitRadius);
+        }
     }
 }

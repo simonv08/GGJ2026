@@ -266,10 +266,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 948c640303eee9144840ecfb982e8d8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MainAtackPrefab: {fileID: 3820281585046062124, guid: 2c62b28f576f20446af91e4eec7b3a9f, type: 3}
-  mainAtackDamage: 10
-  mainAtackSpeed: 2
-  mainAtackDistance: 1
+  MainAttackPrefab: {fileID: 3820281585046062124, guid: 2c62b28f576f20446af91e4eec7b3a9f, type: 3}
+  mainAttackDamage: 10
+  mainAttackSpeed: 2
+  mainAttackDistance: 2
+  dashDamage: 15
+  dashSpeed: 12
+  dashDistance: 5
+  dashStartupDelay: 0.15
+  dashHitRadius: 1.2
+  dashCooldown: 0
 --- !u!114 &30451664
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,7 +370,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: fe68878ccb129fa4c9a94e8414092e0f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
