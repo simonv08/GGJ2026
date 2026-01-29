@@ -2,7 +2,9 @@ using UnityEngine;
 
 public class Bomb : MonoBehaviour
 {
-    public int force;
+    [SerializeField] private int force;
+    [SerializeField] private int damage;
+    
     
     void Start()
     {
@@ -17,5 +19,14 @@ public class Bomb : MonoBehaviour
     void Update()
     {
         
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Enemy")
+        {
+            EnemyBase EnemyScript = other.GetComponent<EnemyBase>(); ////change after enemyScripts made
+            EnemyScript.DoDamage(damage);
+        }
     }
 }
