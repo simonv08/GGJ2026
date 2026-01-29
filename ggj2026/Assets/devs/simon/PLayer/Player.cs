@@ -33,6 +33,8 @@ public class Player : MonoBehaviour
 
     private float standingHeight;
     private Vector3 standingCenter;
+    
+    ShameEnemy currentEnemy;
 
     void Awake()
     {
@@ -92,17 +94,25 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        ShameEnemy enemyThisFrame = null;
+
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
         {
-            if (hit.collider.CompareTag("Enemy"))
+            enemyThisFrame = hit.collider.GetComponent<ShameEnemy>();
+
+            if (enemyThisFrame != null)
             {
-                ShameEnemy enemyScript = hit.collider.GetComponent<ShameEnemy>();
-                if (enemyScript != null)
-                {
-                    enemyScript.Hide();
-                }
+                enemyThisFrame.Hide();
             }
         }
+
+        // Als we vorige frame een enemy hadden, maar nu niet meer
+        if (currentEnemy != null && currentEnemy != enemyThisFrame)
+        {
+            currentEnemy.Show(); // terug naar normal
+        }
+
+        currentEnemy = enemyThisFrame;
     }
 
     private void HandleMovement()

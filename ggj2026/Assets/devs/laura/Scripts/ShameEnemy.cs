@@ -55,4 +55,9 @@ public class ShameEnemy : EnemyBase
     {
         currentState = State.Hidden;
     }
+
+    public void Show()
+    {
+        currentState = State.Normal;
+    }
 }
