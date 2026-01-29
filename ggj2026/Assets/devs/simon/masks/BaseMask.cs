@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BaseMask : MonoBehaviour
 {
-    Player player;
+    //Player player;
     //main atack mask
     virtual public void MainAtackMask()
     {
