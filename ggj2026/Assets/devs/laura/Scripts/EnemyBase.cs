@@ -2,10 +2,10 @@ using UnityEngine;
 
 public abstract class EnemyBase : MonoBehaviour
 {
-    private float health;
+    private int health;
     protected void Start()
     {
-        health = 100f;
+        health = 100;
         gameObject.tag = "Enemy";
     }
 
