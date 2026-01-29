@@ -36,7 +36,7 @@ public class Player : MonoBehaviour
     
     ShameEnemy currentEnemy;
 
-    private float health;
+    [SerializeField] private float health;
 
     void Awake()
     {
@@ -46,6 +46,8 @@ public class Player : MonoBehaviour
         // Store original capsule values
         standingHeight = controller.height;
         standingCenter = controller.center;
+
+        health = 100;
     }
 
     void OnEnable()

@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
+    public float damage;
+    
     private Player player;
     void Start()
     {
@@ -20,7 +22,7 @@ public class Laser : MonoBehaviour
         if (other.tag == "Player")
         {
             player = other.gameObject.GetComponent<Player>();
-            //do player damage
+            player.DoDamage(damage);
         }
     }
 }
