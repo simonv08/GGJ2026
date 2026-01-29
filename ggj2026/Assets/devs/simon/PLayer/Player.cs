@@ -33,6 +33,10 @@ public class Player : MonoBehaviour
 
     private float standingHeight;
     private Vector3 standingCenter;
+    
+    ShameEnemy currentEnemy;
+
+    private float health;
 
     void Awake()
     {
@@ -84,10 +88,33 @@ public class Player : MonoBehaviour
         isCrouching = context.ReadValueAsButton();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         HandleMovement();
         HandleCrouch();
+    }
+
+    void Update()
+    {
+        ShameEnemy enemyThisFrame = null;
+
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
+        {
+            enemyThisFrame = hit.collider.GetComponent<ShameEnemy>();
+
+            if (enemyThisFrame != null)
+            {
+                enemyThisFrame.Hide();
+            }
+        }
+
+        // Als we vorige frame een enemy hadden, maar nu niet meer
+        if (currentEnemy != null && currentEnemy != enemyThisFrame)
+        {
+            currentEnemy.Show(); // terug naar normal
+        }
+
+        currentEnemy = enemyThisFrame;
     }
 
     private void HandleMovement()
@@ -143,5 +170,10 @@ public class Player : MonoBehaviour
         // Restore foot position AFTER resizing
         float bottomAfter = transform.position.y + controller.center.y - controller.height / 2f;
         transform.position += Vector3.up * (bottomBefore - bottomAfter);
+    }
+
+    public void DoDamage(float damage)
+    {
+        health -= damage;
     }
 }

@@ -23,6 +23,8 @@ public class ScaramoucheMask : BaseMask
         {
             ThrowBomb();
         }
+        
+
     }
 
     public override void MainAtackMask()

@@ -1,21 +1,24 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class SaberAttack : MonoBehaviour
 {
     [SerializeField] private MorettaMask morettaMask;
-    private int damage;
+    public float SelfDestructTime = 0.2f;
+
+    private HashSet<GameObject> hitTargets = new HashSet<GameObject>();
 
     void Awake()
     {
+        // Find player if reference not set
         if (morettaMask == null)
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
-
             if (player != null)
-            {
                 morettaMask = player.GetComponent<MorettaMask>();
-            }
         }
+
+        Destroy(gameObject, SelfDestructTime);
     }
 
     public int GetMainAttackDamage()
@@ -25,17 +28,19 @@ public class SaberAttack : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.gameObject.CompareTag("Enemy"))
-            return;
+        Debug.Log("SaberAttack hit: " + other.gameObject.name);
 
-        int damage = GetMainAttackDamage();
-        Debug.Log("Damage dealt: " + damage);
+        if (other.CompareTag("Enemy") && !hitTargets.Contains(other.gameObject))
+        {
+            hitTargets.Add(other.gameObject);
 
-        // Example damage application:
-        // EnemyHealth enemyHealth = collision.gameObject.GetComponent<EnemyHealth>();
-        // if (enemyHealth != null)
-        // {
-        //     enemyHealth.TakeDamage(damage);
-        // }
+            ShameEnemy enemy = other.GetComponent<ShameEnemy>();
+            if (enemy != null)
+            {
+                int damage = GetMainAttackDamage();
+                enemy.DoDamage(damage);
+                Debug.Log("Dealt " + damage + " damage to " + other.gameObject.name);
+            }
+        }
     }
 }
