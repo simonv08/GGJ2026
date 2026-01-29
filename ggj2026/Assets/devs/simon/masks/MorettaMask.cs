@@ -13,6 +13,8 @@ public class MorettaMask : BaseMask
     [SerializeField] private float mainAtackSpeed = 2f; // Higher = Faster
     [SerializeField] private int mainAtackDistance = 1;
 
+    public int MainAttackDamage => mainAtackDamage;
+
     [Header("Dash Attack Stats")]
     [SerializeField] private int dashDamage = 15;
     [SerializeField] private float dashSpeed = 12f;
