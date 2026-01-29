@@ -36,6 +36,8 @@ public class Player : MonoBehaviour
     
     ShameEnemy currentEnemy;
 
+    private float health;
+
     void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -168,5 +170,10 @@ public class Player : MonoBehaviour
         // Restore foot position AFTER resizing
         float bottomAfter = transform.position.y + controller.center.y - controller.height / 2f;
         transform.position += Vector3.up * (bottomBefore - bottomAfter);
+    }
+
+    public void DoDamage(float damage)
+    {
+        health -= damage;
     }
 }
