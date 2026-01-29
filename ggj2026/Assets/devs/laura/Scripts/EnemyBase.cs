@@ -1,16 +1,16 @@
 using UnityEngine;
 
-public class EnemyBase : MonoBehaviour
+public abstract class EnemyBase : MonoBehaviour
 {
-    private float health;
-    void Start()
+    private int health;
+    protected void Start()
     {
-        health = 100f;
+        health = 100;
         gameObject.tag = "Enemy";
     }
 
     // Update is called once per frame
-    void Update()
+    protected void Update()
     {
         if (health <= 0f)
         {
