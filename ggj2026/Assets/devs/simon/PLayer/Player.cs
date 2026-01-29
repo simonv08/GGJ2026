@@ -13,16 +13,16 @@ public class Player : MonoBehaviour
     public MaskType currentMask;
 
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float gravity = -20f;
+    [SerializeField] public float moveSpeed = 5f;
+    [SerializeField] public float gravity = -20f;
 
     [Header("Jump")]
-    [SerializeField] private float jumpForce = 7f;
+    [SerializeField] public float jumpForce = 7f;
 
     [Header("Crouch")]
-    [SerializeField] private float crouchHeight = 1f;
-    [SerializeField] private float crouchSpeedMultiplier = 0.5f;
-    [SerializeField] private float crouchSmoothSpeed = 12f;
+    [SerializeField] public float crouchHeight = 1f;
+    [SerializeField] public float crouchSpeedMultiplier = 0.5f;
+    [SerializeField] public float crouchSmoothSpeed = 12f;
 
     private CharacterController controller;
     private InputSystem_Actions inputActions;
