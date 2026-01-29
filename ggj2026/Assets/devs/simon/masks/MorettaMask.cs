@@ -171,18 +171,20 @@ public class MorettaMask : BaseMask
 
         foreach (Collider hit in hits)
         {
-            GameObject root = hit.transform.root.gameObject;
-
-            if (hitTargets.Contains(root))
+            EnemyBase enemy = hit.GetComponentInParent<EnemyBase>();
+            if (enemy == null)
                 continue;
 
-            // EnemyBase damage pattern
-            EnemyBase enemy = hit.GetComponentInParent<EnemyBase>();
-            if (enemy != null)
-            {
-                enemy.DoDamage(dashDamage);
-                hitTargets.Add(root);
-            }
+            GameObject enemyRoot = enemy.gameObject;
+
+            // Prevent double-hit per dash
+            if (hitTargets.Contains(enemyRoot))
+                continue;
+
+            enemy.DoDamage(dashDamage);
+            hitTargets.Add(enemyRoot);
+
+            Debug.Log($"Dash hit {enemy.name} for {dashDamage}");
         }
     }
 
@@ -201,11 +203,8 @@ public class MorettaMask : BaseMask
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, dashHitRadius);
 
-        if (Application.isPlaying && characterController != null)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(transform.position, transform.position + transform.forward * dashDistance);
-            Gizmos.DrawWireSphere(transform.position + transform.forward * dashDistance, dashHitRadius);
-        }
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(transform.position, transform.position + transform.forward * dashDistance);
+        Gizmos.DrawWireSphere(transform.position + transform.forward * dashDistance, dashHitRadius);
     }
 }

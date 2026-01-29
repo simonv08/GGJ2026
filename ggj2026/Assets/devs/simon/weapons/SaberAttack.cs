@@ -28,22 +28,19 @@ public class SaberAttack : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Prevent hitting non-enemies
-        EnemyBase enemy = other.GetComponentInParent<EnemyBase>();
-        if (enemy == null)
-            return;
+        Debug.Log("SaberAttack hit: " + other.gameObject.name);
 
-        GameObject enemyRoot = enemy.gameObject;
+        if (other.CompareTag("Enemy") && !hitTargets.Contains(other.gameObject))
+        {
+            hitTargets.Add(other.gameObject);
 
-        // Prevent double hits in one attack
-        if (hitTargets.Contains(enemyRoot))
-            return;
-
-        int damage = GetMainAttackDamage();
-
-        enemy.DoDamage(damage);
-        hitTargets.Add(enemyRoot);
-
-        Debug.Log($"Saber hit {enemy.name} for {damage}");
+            ShameEnemy enemy = other.GetComponent<ShameEnemy>();
+            if (enemy != null)
+            {
+                int damage = GetMainAttackDamage();
+                enemy.DoDamage(damage);
+                Debug.Log("Dealt " + damage + " damage to " + other.gameObject.name);
+            }
+        }
     }
 }
