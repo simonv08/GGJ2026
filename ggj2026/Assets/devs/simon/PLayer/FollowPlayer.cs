@@ -21,7 +21,7 @@ public class FollowPlayer : MonoBehaviour
         }
     }
 
-    void LateUpdate()
+    void FixedUpdate()
     {
         if (target == null)
             return;
@@ -29,8 +29,7 @@ public class FollowPlayer : MonoBehaviour
         Vector3 currentPos = transform.position;
 
         // Lerp only X, allow Y manual changes, lock Z
-        float newX = Mathf.Lerp(currentPos.x, target.position.x, lerpSpeed * Time.deltaTime);
-
+        float newX = Mathf.Lerp(currentPos.x, target.position.x, lerpSpeed * Time.fixedDeltaTime);
         Vector3 targetPos = new Vector3(newX, currentPos.y, lockedZ);
         transform.position = targetPos;
 

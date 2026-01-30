@@ -12,6 +12,7 @@ public class MorettaMask : BaseMask
     [SerializeField] private int mainAttackDamage = 10;
     [SerializeField] private float mainAttackSpeed = 2f;
     [SerializeField] private float mainAttackDistance = 1f;
+    [SerializeField] private float mainAttackHeight = 1f;
 
     [Header("Dash Settings")]
     [SerializeField] private int dashDamage = 15;
@@ -100,12 +101,24 @@ public class MorettaMask : BaseMask
         float slideDuration = 0.15f;
         StartCoroutine(SlideForward(slideDistance, slideDuration));
 
+        float rightOffset = 0.9f; // adjust in inspector later if needed
+
+        Vector3 spawnPosition =
+            transform.position +
+            transform.forward * mainAttackDistance +
+            transform.right * rightOffset +   // RIGHT OFFSET
+            Vector3.up * mainAttackHeight;
+
+        Quaternion attackRotation = transform.rotation * Quaternion.Euler(90f, -90f, 0f);
+
         Instantiate(
             MainAttackPrefab,
-            transform.position + transform.forward * mainAttackDistance,
-            transform.rotation
+            spawnPosition,
+            attackRotation
         );
     }
+
+
 
     private IEnumerator SlideForward(float distance, float duration)
     {
@@ -177,7 +190,6 @@ public class MorettaMask : BaseMask
 
             GameObject enemyRoot = enemy.gameObject;
 
-            // Prevent double-hit per dash
             if (hitTargets.Contains(enemyRoot))
                 continue;
 

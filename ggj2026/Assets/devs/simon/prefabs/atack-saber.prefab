@@ -122,3 +122,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   morettaMask: {fileID: 0}
+  SelfDestructTime: 0.2
