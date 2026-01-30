@@ -4,32 +4,43 @@ using UnityEngine.SceneManagement;
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
-    
 
-    void Awake()
+    [Header("Scene Names")]
+    [SerializeField] private string menuSceneName = "Menu";
+    [SerializeField] private string levelSceneName = "Level";
+
+
+
+    /// <summary>
+    /// Toggles between Level and Menu based on current scene
+    /// </summary>
+    public void ToggleScene()
     {
-        if (Instance != null && Instance != this)
+        string currentScene = SceneManager.GetActiveScene().name;
+
+        if (currentScene == levelSceneName)
         {
-            Destroy(gameObject);
-            return;
+            LoadScene(menuSceneName);
         }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-    void Start()
-    {
-        
+        else
+        {
+            LoadScene(levelSceneName);
+        }
+        gameObject.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
+    /// <summary>
+    /// Load a specific scene
+    /// </summary>
+    public void LoadScene(string sceneName)
     {
-        
-    }
-
-    public void LoadLevel(string levelName)
-    {
-        SceneManager.LoadScene(levelName);
+        if (!string.IsNullOrEmpty(sceneName))
+        {
+            SceneManager.LoadScene(sceneName);
+        }
+        else
+        {
+            Debug.LogWarning("LevelManager: Scene name is null or empty.");
+        }
     }
 }
