@@ -9,6 +9,10 @@ public class Player : MonoBehaviour
         bautta,
         scaramouche
     }
+    
+    MorettaMask morettaMask;
+    BouttaMask bouttaMask;
+    ScaramoucheMask scaramoucheMask;
 
     public MaskType currentMask;
 
@@ -48,6 +52,10 @@ public class Player : MonoBehaviour
         standingCenter = controller.center;
 
         health = 100;
+        
+        scaramoucheMask = gameObject.GetComponent<ScaramoucheMask>();
+        bouttaMask = gameObject.GetComponent<BouttaMask>();
+        morettaMask = gameObject.GetComponent<MorettaMask>();
     }
 
     void OnEnable()
@@ -117,6 +125,8 @@ public class Player : MonoBehaviour
         }
 
         currentEnemy = enemyThisFrame;
+        
+        handleState();
     }
 
     private void HandleMovement()
@@ -138,16 +148,44 @@ public class Player : MonoBehaviour
         velocity.y = verticalVelocity;
         controller.Move(velocity * Time.deltaTime);
 
-        // --- Handle rotation ---
-        // Only rotate if moving
+        // --- Rotate player toward movement direction ---
         Vector3 horizontalMovement = new Vector3(movement.x, 0f, movement.z);
+
         if (horizontalMovement.sqrMagnitude > 0.001f)
         {
-            // Determine target rotation
             Quaternion targetRotation = Quaternion.LookRotation(horizontalMovement, Vector3.up);
 
+            // Smooth rotation
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                Time.deltaTime * 25f // rotation speed (tweakable)
+            );
         }
     }
+
+    private void handleState()
+    {
+        switch (currentMask)
+        {
+            case MaskType.moretta:
+                morettaMask.enabled = true;
+                bouttaMask.enabled = false;
+                scaramoucheMask.enabled = false;
+                break;
+            case MaskType.bautta:
+                morettaMask.enabled = false;
+                bouttaMask.enabled = true;
+                scaramoucheMask.enabled = false;
+                break;
+            case MaskType.scaramouche:
+                morettaMask.enabled = false;
+                bouttaMask.enabled = false;
+                scaramoucheMask.enabled = true;
+                break;
+        }
+    }
+
     private void HandleCrouch()
     {
         float targetHeight = isCrouching ? crouchHeight : standingHeight;
@@ -175,5 +213,22 @@ public class Player : MonoBehaviour
     public void DoDamage(float damage)
     {
         health -= damage;
+    }
+
+
+
+    public void PutMask1()
+    {
+        currentMask = MaskType.bautta;
+    }
+
+    public void PutMask2()
+    {
+        currentMask = MaskType.moretta;
+    }
+
+    public void PutMask3()
+    {
+        currentMask = MaskType.scaramouche;
     }
 }
