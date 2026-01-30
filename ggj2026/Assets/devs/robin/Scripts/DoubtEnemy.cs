@@ -2,15 +2,23 @@ using UnityEngine;
 
 public class DoubtEnemy : EnemyBase
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         base.Start();
     }
 
-    // Update is called once per frame
     void Update()
     {
         base.Update();
+    }
+
+    private void Attack() 
+    { 
+
+    }
+
+    private void LookForPlayer()
+    {
+
     }
 }

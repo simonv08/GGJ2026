@@ -1,16 +1,19 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class BouttaMask : BaseMask
 {
     [SerializeField] private Transform muzzlePoint;
     [SerializeField] private LayerMask hitLayer = ~0;
 
+    [Header("Saber Slash Settings")]
     [SerializeField] private int slashDamage = 25;
     [SerializeField] private float slashRange = 1.5f;
     [SerializeField] private float slashRadius = 1.2f;
     [SerializeField] private float slashCooldown = 0.6f;
 
+    [Header("Blunderbuss Settings")]
     [SerializeField] private int pelletCount = 8;
     [SerializeField] private int pelletDamage = 10;
     [SerializeField] private float spreadAngleDeg = 25f;
@@ -18,17 +21,29 @@ public class BouttaMask : BaseMask
     [SerializeField] private float shootCooldown = 0.25f;
     [SerializeField] private float bulletSpawnOffset = 0.15f;
 
-    private void Update()
+    [Header("Player Settings Adjustment")]
+    [SerializeField] private float moveSpeed_Player = 6f;
+    [SerializeField] private float gravity_Player = -18f;
+    [SerializeField] private float jumpForce_Player = 8f;
+    [SerializeField] private float crouchHeight_Player = 1f;
+    [SerializeField] private float crouchSpeedMultiplier_Player = 1f;
+    [SerializeField] private float crouchSmoothSpeed_Player = 15f;
+
+    private InputSystem_Actions playerInput;
+    private CharacterController characterController;
+    private float attackCooldown = 0f;
+
+    private Player playerScript;
+
+    void OnEnable()
     {
-        // debug input handling for testing in editor
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            MainAtackMask();
-        }
-        if (Input.GetKeyDown(KeyCode.Mouse1))
-        {
-            SecondaryAtackMask();
-        }
+        playerInput = new InputSystem_Actions();
+        playerInput.Player.Enable();
+
+        characterController = GetComponent<CharacterController>();
+        playerScript = GetComponent<Player>();
+
+        ApplyPlayerSettings();
     }
 
     // MAIN ATTACK -> Saber Slash
@@ -118,6 +133,18 @@ public class BouttaMask : BaseMask
         // find a basis that maps local cone z to baseDir
         Quaternion q = Quaternion.FromToRotation(Vector3.forward, baseDir.normalized);
         return q * localDir;
+    }
+
+    private void ApplyPlayerSettings()
+    {
+        if (playerScript == null) return;
+
+        playerScript.moveSpeed = moveSpeed_Player;
+        playerScript.gravity = gravity_Player;
+        playerScript.jumpForce = jumpForce_Player;
+        playerScript.crouchHeight = crouchHeight_Player;
+        playerScript.crouchSpeedMultiplier = crouchSpeedMultiplier_Player;
+        playerScript.crouchSmoothSpeed = crouchSmoothSpeed_Player;
     }
 
 #if UNITY_EDITOR
