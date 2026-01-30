@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
 
     private float standingHeight;
     private Vector3 standingCenter;
-    
+
     ShameEnemy currentEnemy;
 
     [SerializeField] private float health;
@@ -146,8 +146,6 @@ public class Player : MonoBehaviour
             // Determine target rotation
             Quaternion targetRotation = Quaternion.LookRotation(horizontalMovement, Vector3.up);
 
-            // Smoothly rotate towards movement direction
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
         }
     }
     private void HandleCrouch()
