@@ -12,8 +12,8 @@ public class ScaramoucheMask : BaseMask
     
     void Start()
     {
-        BombShootPoint = transform.Find("BombShootPoint").gameObject;
-        KnifeShootPoint = transform.Find("KnifeShootPoint").gameObject;
+        BombShootPoint = transform.Find("ShootPoint").gameObject;
+        KnifeShootPoint = transform.Find("ShootPoint").gameObject;
     }
 
     // Update is called once per frame
