@@ -1,15 +1,21 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class ShameEnemy : EnemyBase
 {
-    [SerializeField] private float LaserCoolDown;
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 3.5f;
+    private NavMeshAgent agent;
+
+    [Header("Laser")]
+    [SerializeField] private float laserCoolDown = 2f;
     private float laserTimer;
-    
+
     [SerializeField] private GameObject laserPrefab;
     [SerializeField] private GameObject shootPoint;
-    
+
     private GameObject player;
-    
+
     public enum State
     {
         Normal,
@@ -17,27 +23,39 @@ public class ShameEnemy : EnemyBase
     }
 
     public State currentState;
-    
+
     void Start()
     {
         base.Start();
+
         currentState = State.Normal;
+
         player = GameObject.FindWithTag("Player");
+
+        // NAVMESH (gejat uit Grief 👀)
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = moveSpeed;
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
         base.Update();
+
         HandleSwitch();
         DoState();
-        
+
         laserTimer += Time.deltaTime;
-        if (laserTimer >= LaserCoolDown)
+        if (laserTimer >= laserCoolDown && currentState == State.Normal)
         {
             ShootLaser();
         }
-
     }
 
     private void HandleSwitch()
@@ -45,10 +63,11 @@ public class ShameEnemy : EnemyBase
         switch (currentState)
         {
             case State.Normal:
-                //switchtohidden
+                MoveToPlayer();
                 break;
+
             case State.Hidden:
-                //switchtonormal
+                StopMoving();
                 break;
         }
     }
@@ -58,13 +77,28 @@ public class ShameEnemy : EnemyBase
         switch (currentState)
         {
             case State.Normal:
-                Debug.Log("Normal");
+                // normaal gedrag
                 break;
+
             case State.Hidden:
-                Debug.Log("Hidden");
+                // reset laser als hij bekeken wordt
                 laserTimer = 0f;
                 break;
         }
+    }
+
+    void MoveToPlayer()
+    {
+        if (agent == null || player == null) return;
+
+        agent.isStopped = false;
+        agent.SetDestination(player.transform.position);
+    }
+
+    void StopMoving()
+    {
+        if (agent == null) return;
+        agent.isStopped = true;
     }
 
     public void Hide()
@@ -79,10 +113,7 @@ public class ShameEnemy : EnemyBase
 
     private void ShootLaser()
     {
-        Debug.Log("Shoot!");
         Vector3 direction = player.transform.position - shootPoint.transform.position;
-        //Debug.DrawRay(shootPoint.transform.position, direction, Color.red, 2f);
-
 
         GameObject laser = Instantiate(
             laserPrefab,
@@ -91,7 +122,7 @@ public class ShameEnemy : EnemyBase
         );
 
         Rigidbody rb = laser.GetComponent<Rigidbody>();
-        rb.AddForce(direction * 10f, ForceMode.Impulse);
+        rb.AddForce(direction.normalized * 10f, ForceMode.Impulse);
 
         laserTimer = 0f;
     }

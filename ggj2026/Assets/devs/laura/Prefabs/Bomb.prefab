@@ -155,6 +155,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   force: 10
+  damage: 0
+  delayDoingDamage: 10
 --- !u!136 &768529101030138376
 CapsuleCollider:
   m_ObjectHideFlags: 0
